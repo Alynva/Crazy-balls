@@ -3,16 +3,19 @@
 
 #include "SDL2/SDL.h"
 
+#include "EventManager.h"
 #include "Ball.h"
 
 class CrazyBalls {
 	SDL_Window* window;
 	SDL_Renderer* renderer;
-	SDL_Event event;
+	EventManager event;
+	bool quit;
 	Ball ball;
+	SDL_Point user_pos;
 
 	public:
-		CrazyBalls():window(nullptr), renderer(nullptr), ball(this->renderer, {10, 10}, {10, 10}) {};
+		CrazyBalls():window(nullptr), renderer(nullptr), event(&quit, &user_pos), ball(this->renderer, {10, 10}, {10, 10}) {};
 		~CrazyBalls();
 		bool init();
 		void run();
@@ -47,28 +50,22 @@ bool CrazyBalls::init() {
 }
 
 void CrazyBalls::run() {
-	bool quit = false;
 	SDL_Rect* r = new SDL_Rect;
 	r->x = 20;
 	r->y = 40;
 	r->w = 50;
-	r->h = 50;
-	while (!quit) {
-		while (SDL_PollEvent(&this->event)) {
-			switch(this->event.type) {
-				case SDL_QUIT:
-					quit = true;
-					break;
-			}
-		}
+	r->h = 10;
+	while (!this->quit) {
+		this->event.update();		
+
 		SDL_RenderClear(this->renderer);
 		SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
-		SDL_Point pos;
-		SDL_GetMouseState(&pos.x, &pos.y);
-		ball.setPosition(pos);
+
+		ball.setPosition({30, 30});
 		ball.render();
-		r->x = pos.x - 1;
-		r->y = pos.y - 1;
+
+		r->x = this->user_pos.x - 25;
+		r->y = 480;
 		SDL_RenderFillRect(this->renderer, r); 
 		SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
 		SDL_RenderPresent(this->renderer);
