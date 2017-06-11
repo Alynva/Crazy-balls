@@ -1,10 +1,9 @@
 #ifndef CRAZY_BALLS
 #define CRAZY_BALLS
 
-#include "SDL2/SDL.h"
-
 #include "EventManager.h"
 #include "Ball.h"
+#include "Player.h"
 
 class CrazyBalls {
 	SDL_Window* window;
@@ -12,10 +11,11 @@ class CrazyBalls {
 	EventManager event;
 	bool quit;
 	Ball ball;
-	SDL_Point user_pos;
+	Player player;
+	SDL_Point mouse_pas;
 
 	public:
-		CrazyBalls():window(nullptr), renderer(nullptr), event(&quit, &user_pos), ball(this->renderer, {10, 10}, {10, 10}) {};
+		CrazyBalls():window(nullptr), renderer(nullptr), event(&quit, &mouse_pas), quit(false), ball("../media/imgs/Dark_Matter_Ball.png", this->renderer, {10, 10, 10, 10}), player("../media/imgs/Dark_Matter_Rectangle.png", this->renderer, {50, 150, 50, 10}) {};
 		~CrazyBalls();
 		bool init();
 		void run();
@@ -31,7 +31,7 @@ CrazyBalls::~CrazyBalls() {
 }
 
 bool CrazyBalls::init() {
-	this->window = SDL_CreateWindow("Crazy Balls", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, SDL_WINDOW_RESIZABLE);
+	this->window = SDL_CreateWindow("Crazy Balls v0.1.0", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 500, SDL_WINDOW_RESIZABLE);
 	if (this->window == NULL) {
 		SDL_Log("Window could not be created. SDL Error: %s", SDL_GetError());
 		return false;
@@ -44,29 +44,23 @@ bool CrazyBalls::init() {
 			SDL_SetRenderDrawColor(this->renderer, 55, 55, 155, 255);
 		}
 	}
-	Ball temp(this->renderer, {10, 10}, {10, 10});
-	this->ball = temp;
+	this->ball.setRenderer(this->renderer);
+	this->player.setRenderer(this->renderer);
 	return true;
 }
 
 void CrazyBalls::run() {
-	SDL_Rect* r = new SDL_Rect;
-	r->x = 20;
-	r->y = 40;
-	r->w = 50;
-	r->h = 10;
 	while (!this->quit) {
 		this->event.update();		
 
 		SDL_RenderClear(this->renderer);
 		SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
 
-		ball.setPosition({30, 30});
 		ball.render();
 
-		r->x = this->user_pos.x - 25;
-		r->y = 480;
-		SDL_RenderFillRect(this->renderer, r); 
+		player.setPosition({this->mouse_pas.x, 450});
+		player.render();
+
 		SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
 		SDL_RenderPresent(this->renderer);
 	}
